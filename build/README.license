@@ -1,0 +1,3 @@
+None of the code in this directory will get linked into the final
+binaries shipped out of this repository. For this reason, we ignore
+this directory when collecting up all the licenses.
