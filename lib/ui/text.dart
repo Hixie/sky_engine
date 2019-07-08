@@ -103,6 +103,25 @@ class FontWeight {
 }
 
 /// A feature tag and value that affect the selection of glyphs in a font.
+///
+/// Some of the standardised features have dedicated constructors. Those that do
+/// not, and non-standard extensions, can be enabled using the
+/// [FontFeature.enable] constructor, disabled using [FontFeature.disable], and
+/// given specific values using the default [new FontFeature] constructor.
+///
+/// The following constructors are defined:
+///
+///  * `onum`: [FontFeature.oldstyleFigures]
+///  * `pnum`: [FontFeature.proportionalFigures]
+///  * `rand': [FontFeature.randomize]
+///  * `ss01` through `ss20`: [FontFeature.stylisticSet]
+///  * `tnum`: [FontFeature.tabularFigures]
+///  * `zero`: [FontFeature.slashedZero]
+///
+/// See also:
+///
+///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/featurelist>,
+///    which lists the standard font features.
 class FontFeature {
   /// Creates a [FontFeature] object, which can be added to a [TextStyle] to
   /// change how the engine selects glyphs when rendering text.
@@ -111,7 +130,7 @@ class FontFeature {
   /// These tags are specified by font formats such as OpenType.
   ///
   /// `value` is the value that the feature will be set to.  The behavior
-  /// of the value depends on the specific feature.  Many features are
+  /// of the value depends on the specific feature. Many features are
   /// flags whose value can be 1 (when enabled) or 0 (when disabled).
   ///
   /// See <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>
@@ -123,42 +142,11 @@ class FontFeature {
   /// Create a [FontFeature] object that disables the feature with the given tag.
   const FontFeature.disable(String feature) : this(feature, 0);
 
-  /// Randomize the alternate forms used in text.
-  ///
-  /// For example, this can be used with suitably-prepared handwriting fonts to
-  /// vary the forms used for each character, so that, for instance, the word
-  /// "cross-section" would be rendered with two different "c"s, two different "o"s,
-  /// and three different "s"s.
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#rand>
-  const FontFeature.randomize() : feature = 'rand', value = 1;
+  // THE REMAINING CONSTRUCTORS ARE FOR EACH FEATURE DEFINED IN OPENTYPE.
+  // THEY SHOULD BE LISTED IN ALPHABETICAL ORDER BY FEATURE TAG, TO MAKE
+  // IT EASIER TO VERIFY IF A PARTICULAR TAG HAS BEEN IMPLEMENTED.
 
-  /// Select a stylistic set.
-  ///
-  /// Fonts may have up to 20 stylistic sets, numbered 1 through 20.
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#ssxx>
-  factory FontFeature.stylisticSet(int value) {
-    assert(value >= 1);
-    assert(value <= 20);
-    return FontFeature('ss${value.toString().padLeft(2, "0")}');
-  }
-
-  /// Use the slashed zero.
-  ///
-  /// Some fonts contain both a circular zero and a zero with a slash. This
-  /// enables the use of the latter form.
-  ///
-  /// This is overridden by [FontFeature.oldstyleFigures].
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_uz#zero>
-  const FontFeature.slashedZero() : feature = 'zero', value = 1;
+  // WHEN ADDING CONSTRUCTORS, ALSO UPDATE THE LIST IN THE CLASS DOCS.
 
   /// Use oldstyle figures.
   ///
@@ -187,6 +175,50 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#pnum>
   const FontFeature.proportionalFigures() : feature = 'pnum', value = 1;
 
+  /// Randomize the alternate forms used in text.
+  ///
+  /// For example, this can be used with suitably-prepared handwriting fonts to
+  /// vary the forms used for each character, so that, for instance, the word
+  /// "cross-section" would be rendered with two different "c"s, two different "o"s,
+  /// and three different "s"s.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#rand>
+  const FontFeature.randomize() : feature = 'rand', value = 1;
+
+  /// Select a stylistic set.
+  ///
+  /// Fonts may have up to 20 stylistic sets, numbered 1 through 20. Each can be
+  /// enabled independently.
+  ///
+  /// Each font defines its own sets of styles.
+  ///
+  /// For example, Apple's San Francisco font (the default font on some versions
+  /// of iOS) uses set 1 to replace the tails of the 6 and 9 digits with
+  /// straight lines rather than curves, set 2 to open the top of the digit 4,
+  /// set 3 to center the colon vertically rather than having it sit on the
+  /// baseline, set 6 to enable a "high legibility" mode where e.g. the zero has
+  /// a slash and the upper-case "i" and lower-case "L" are distinguished, and
+  /// set 7 to change the character "a" from its "double-storey" form to its
+  /// "single-story" form.
+  ///
+  /// Similarly, the _Studio™ Pro_ font from _Two Type Dept_ defines ten
+  /// stylistic sets: set 1 enables the single-story "a", set 6 enables a
+  /// slightly different look for digits, set 9 changes the size of the
+  /// registered trademark symbol, and so forth.
+  ///
+  /// Refer to your font's technical documentation, if available, for more details.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#ssxx>
+  factory FontFeature.stylisticSet(int value) {
+    assert(value >= 1);
+    assert(value <= 20);
+    return FontFeature('ss${value.toString().padLeft(2, "0")}');
+  }
+
   /// Use tabular (monospace) figures.
   ///
   /// For fonts that have both proportional (varying width) and tabular figures,
@@ -201,7 +233,19 @@ class FontFeature {
   ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#tnum>
   const FontFeature.tabularFigures() : feature = 'tnum', value = 1;
 
-  /// The tag that identifies the effect of this feature.  Must consist of 4
+  /// Use the slashed zero.
+  ///
+  /// Some fonts contain both a circular zero and a zero with a slash. This
+  /// enables the use of the latter form.
+  ///
+  /// This is overridden by [FontFeature.oldstyleFigures].
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_uz#zero>
+  const FontFeature.slashedZero() : feature = 'zero', value = 1;
+
+  /// The tag that identifies the effect of this feature. Must consist of 4
   /// ASCII characters (typically lowercase letters).
   ///
   /// See <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>
@@ -209,7 +253,7 @@ class FontFeature {
 
   /// The value assigned to this feature.
   ///
-  /// Must be a positive integer.  Many features are Boolean values that accept
+  /// Must be a positive integer. Many features are Boolean values that accept
   /// values of either 0 (feature is disabled) or 1 (feature is enabled).
   final int value;
 
@@ -231,14 +275,14 @@ class FontFeature {
       return false;
     final FontFeature typedOther = other;
     return feature == typedOther.feature
-           && value == typedOther.value;
+        && value == typedOther.value;
   }
 
   @override
   int get hashCode => hashValues(feature, value);
 
   @override
-  String toString() => 'FontFeature($feature, $value)';
+  String toString() => 'FontFeature("$feature", $value)';
 }
 
 /// Whether and how to align text horizontally.
